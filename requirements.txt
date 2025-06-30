@@ -3,6 +3,7 @@
 # Основные зависимости
 Django==4.2.10
 djangorestframework==3.14.0
+django-filter==23.5
 psycopg2-binary==2.9.6  # Для работы с PostgreSQL
 
 # Парсинг и HTTP-запросы
