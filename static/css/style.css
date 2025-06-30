@@ -45,3 +45,28 @@ button[onclick="parseProducts()"]:hover {
   animation: pulse 1s infinite;
   background-color: #e2e6ea;
 }
+
+/* Стили для ссылок в таблице */
+.product-link {
+  color: #4e73df;
+  text-decoration: none;
+  transition: color 0.3s;
+  display: inline-block;
+  width: 100%;
+}
+
+.product-link:hover {
+  color: #2e59d9;
+  text-decoration: underline;
+}
+
+.product-link i {
+  font-size: 0.8em;
+  margin-left: 5px;
+  opacity: 0.7;
+}
+
+/* Для лучшей читаемости при наведении */
+#productsTable tr:hover {
+  background-color: rgba(78, 115, 223, 0.05);
+}

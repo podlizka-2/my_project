@@ -6,8 +6,8 @@ class Product(models.Model):
     sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     rating = models.FloatField(null=True, blank=True)
     reviews_count = models.PositiveIntegerField(default=0)
-    query = models.CharField(max_length=255, blank=True)  # Добавлено поле для запроса
-    
+    query = models.CharField(max_length=255, blank=True)
+    url = models.URLField(max_length=500, blank=True, null=True, verbose_name="Ссылка на товар")
 
     def __str__(self):
         return self.name
@@ -16,3 +16,4 @@ class Product(models.Model):
         if self.price and self.sale_price and self.price > 0:
             return round((self.price - self.sale_price) / self.price * 100, 2)
         return 0
+    

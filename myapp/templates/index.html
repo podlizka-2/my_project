@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Добавлены иконки Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
@@ -55,8 +57,6 @@
                     <th><a href="#" onclick="sortTable('sale_price')">Цена со скидкой</a></th>
                     <th><a href="#" onclick="sortTable('rating')">Рейтинг</a></th>
                     <th><a href="#" onclick="sortTable('reviews_count')">Отзывы</a></th>
-                    <!-- Добавляем колонку для ссылки -->
-                    <th>Ссылка</th>
                 </tr>
             </thead>
             <tbody>
@@ -140,7 +140,12 @@
             }
             
             fetch(`/api/products/?${params}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     currentData = data;
                     renderTable(data);
@@ -148,7 +153,7 @@
                 })
                 .catch(error => {
                     console.error('Ошибка загрузки данных:', error);
-                    alert('Ошибка при загрузке данных с сервера');
+                    alert('Ошибка при загрузке данных с сервера: ' + error.message);
                 });
         }
         
@@ -168,17 +173,34 @@
             const tableBody = document.querySelector('#productsTable tbody');
             tableBody.innerHTML = '';
             
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Нет данных для отображения</td></tr>';
                 return;
             }
             
             data.forEach(product => {
                 const row = document.createElement('tr');
+                
+                // Формируем ячейку с названием как ссылкой
+                let nameCell;
+                if (product.name && product.url) {
+                    nameCell = `<td>
+                        <a href="${product.url}" target="_blank" class="product-link">
+                            ${product.name}
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                    </td>`;
+                } else if (product.name) {
+                    nameCell = `<td>${product.name}</td>`;
+                } else {
+                    nameCell = `<td>-</td>`;
+                }
+                
+                // Формируем остальные ячейки
                 row.innerHTML = `
-                    <td>${product.name || '-'}</td>
-                    <td>${product.price ? product.price.toLocaleString() + ' ₽' : '-'}</td>
-                    <td>${product.sale_price ? product.sale_price.toLocaleString() + ' ₽' : '-'}</td>
+                    ${nameCell}
+                    <td>${product.price ? product.price.toLocaleString('ru-RU') + ' ₽' : '-'}</td>
+                    <td>${product.sale_price ? product.sale_price.toLocaleString('ru-RU') + ' ₽' : '-'}</td>
                     <td>${product.rating !== null ? product.rating : '-'}</td>
                     <td>${product.reviews_count}</td>
                 `;
@@ -194,13 +216,25 @@
         
         // Гистограмма цен
         function updatePriceHistogram(data) {
+            const ctx = document.getElementById('priceHistogram').getContext('2d');
+            if (priceHistogramChart) priceHistogramChart.destroy();
+            
+            // Проверка наличия данных
+            if (!data || data.length === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.font = '16px Arial';
+                ctx.fillText('Нет данных для отображения', 10, 50);
+                return;
+            }
+            
             const prices = data
                 .map(p => p.price)
                 .filter(price => price !== null && !isNaN(price));
-            
+                
             if (prices.length === 0) {
-                if (priceHistogramChart) priceHistogramChart.destroy();
-                document.getElementById('priceHistogram').innerHTML = '<p class="text-center">Нет данных для гистограммы</p>';
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.font = '16px Arial';
+                ctx.fillText('Нет данных о ценах', 10, 50);
                 return;
             }
             
@@ -220,10 +254,6 @@
                 const end = Math.round(minPrice + (i + 1) * binSize);
                 return `${start} - ${end} ₽`;
             });
-            
-            const ctx = document.getElementById('priceHistogram').getContext('2d');
-            
-            if (priceHistogramChart) priceHistogramChart.destroy();
             
             priceHistogramChart = new Chart(ctx, {
                 type: 'bar',
@@ -261,6 +291,17 @@
         
         // График скидка vs рейтинг
         function updateDiscountRatingChart(data) {
+            const ctx = document.getElementById('discountRatingChart').getContext('2d');
+            if (discountRatingChart) discountRatingChart.destroy();
+            
+            // Проверка наличия данных
+            if (!data || data.length === 0) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.font = '16px Arial';
+                ctx.fillText('Нет данных для отображения', 10, 50);
+                return;
+            }
+            
             const discountData = data
                 .filter(p => p.price && p.sale_price && p.rating !== null)
                 .map(p => {
@@ -269,21 +310,14 @@
                         discount,
                         rating: p.rating
                     };
-                })
-                .sort((a, b) => a.discount - b.discount);
-            
+                });
+                
             if (discountData.length === 0) {
-                if (discountRatingChart) discountRatingChart.destroy();
-                document.getElementById('discountRatingChart').innerHTML = '<p class="text-center">Нет данных для графика</p>';
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.font = '16px Arial';
+                ctx.fillText('Нет данных для графика', 10, 50);
                 return;
             }
-            
-            const discounts = discountData.map(d => d.discount);
-            const ratings = discountData.map(d => d.rating);
-            
-            const ctx = document.getElementById('discountRatingChart').getContext('2d');
-            
-            if (discountRatingChart) discountRatingChart.destroy();
             
             discountRatingChart = new Chart(ctx, {
                 type: 'scatter',
@@ -307,7 +341,9 @@
                             title: {
                                 display: true,
                                 text: 'Скидка (%)'
-                            }
+                            },
+                            min: 0,
+                            max: 100
                         },
                         y: {
                             title: {
