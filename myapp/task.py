@@ -34,6 +34,7 @@ def parse_wildberries(query):
         response.raise_for_status()
         data = response.json()
         
+        
         # Проверяем наличие данных
         if not data.get('data') or not data['data'].get('products'):
             print("Нет данных в ответе API")

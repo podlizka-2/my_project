@@ -39,19 +39,32 @@ function sortTable(field) {
 }
 
 function renderTable(data) {
-    const table = document.getElementById('productsTable');
-    table.innerHTML = '';
+    const tableBody = document.querySelector('#productsTable tbody');
+    tableBody.innerHTML = '';
     
-    data.forEach(item => {
+    if (!data || data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Нет данных для отображения</td></tr>';
+        return;
+    }
+    
+    data.forEach(product => {
         const row = document.createElement('tr');
+        
+        // Добавляем ячейку со ссылкой
+        let linkCell = '<td>-</td>';
+        if (product.url) {
+            linkCell = `<td><a href="${product.url}" target="_blank" class="btn btn-sm btn-primary">Открыть</a></td>`;
+        }
+        
         row.innerHTML = `
-            <td>${item.name}</td>
-            <td>${item.price} ₽</td>
-            <td>${item.sale_price} ₽</td>
-            <td>${item.rating}</td>
-            <td>${item.reviews_count}</td>
+            <td>${product.name || '-'}</td>
+            <td>${product.price ? product.price.toLocaleString('ru-RU') + ' ₽' : '-'}</td>
+            <td>${product.sale_price ? product.sale_price.toLocaleString('ru-RU') + ' ₽' : '-'}</td>
+            <td>${product.rating !== null ? product.rating : '-'}</td>
+            <td>${product.reviews_count}</td>
+            ${linkCell}
         `;
-        table.appendChild(row);
+        tableBody.appendChild(row);
     });
 }
 

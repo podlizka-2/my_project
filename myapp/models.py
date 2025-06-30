@@ -7,6 +7,7 @@ class Product(models.Model):
     rating = models.FloatField(null=True, blank=True)
     reviews_count = models.PositiveIntegerField(default=0)
     query = models.CharField(max_length=255, blank=True)  # Добавлено поле для запроса
+    
 
     def __str__(self):
         return self.name
