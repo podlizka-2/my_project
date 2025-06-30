@@ -1,0 +1,32 @@
+# requirements.txt
+
+# Основные зависимости
+Django==4.2.10
+djangorestframework==3.14.0
+psycopg2-binary==2.9.6  # Для работы с PostgreSQL
+
+# Парсинг и HTTP-запросы
+requests==2.31.0
+beautifulsoup4==4.12.2
+
+# Асинхронность и задачи
+celery==5.3.1
+redis==4.5.5
+
+# Управление окружением
+python-dotenv==1.0.0
+
+# Деплой и сервер
+gunicorn==21.2.0
+
+# Тестирование
+pytest==7.4.0
+pytest-django==4.5.2
+
+# Форматирование кода
+black==23.9.1
+isort==5.12.0
+mypy==1.7.1
+
+# Опционально (если нужно)
+django-cors-headers==4.2.0  # Для CORS
